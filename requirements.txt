@@ -4,6 +4,7 @@ Django==2.0.4
 # Configuration
 gunicorn==19.7.1
 setproctitle==1.1.10  # To show the name of the gunicorn process when: top, ps,...
+django-cors-headers==2.2.0
 
 # Google Cloud Storage
 django-storages==1.6.6
