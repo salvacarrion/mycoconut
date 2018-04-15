@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Main pakages
+# Main packages
 sudo apt-get update && sudo apt-get -y upgrade
 sudo apt-get install git
 sudo apt-get install mysql-client
