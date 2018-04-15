@@ -1,0 +1,5 @@
+# Core dependencies
+Django==2.0.4
+
+# My repos
+git+https://github.com/salvacarrion/raefinder.git#egg=raefinder
