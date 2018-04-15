@@ -1,5 +1,14 @@
 # Core dependencies
 Django==2.0.4
 
+# Configuration
+gunicorn==19.7.1
+setproctitle==1.1.10  # To show the name of the gunicorn process when: top, ps,...
+
+# Google Cloud Storage
+django-storages==1.6.6
+apache-libcloud==2.3.0
+pycrypto==2.6.1
+
 # My repos
 git+https://github.com/salvacarrion/raefinder.git#egg=raefinder

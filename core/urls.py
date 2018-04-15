@@ -14,9 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from . import views
+from core.views import views, views_ajax
 
 urlpatterns = [
     path('', views.index, name='index'),
     path('demo/', views.demo, name='demo'),
+    path('ajax/get-number/', views_ajax.get_number, name='get_number'),
 ]
