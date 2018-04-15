@@ -10,7 +10,7 @@ def get_number(request):
 
     try:
         if request.method == 'POST':
-            number = int(request.POST['number'])
+            number = request.POST['number']  # MUST BE STRING => CASE int('021') -> 21 ('0' missing)
             rules = json.loads(request.POST['rules'])
 
             # Check rules (keys must be int)
