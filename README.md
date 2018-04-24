@@ -30,54 +30,54 @@ Basic deployment (draft)
 1. Create gmail account
 2. Create Google Cloud account (1-year free)
 3. Create Compute Engine instance (small)
-    1. Access from the local console
-        1. Log in gcloud (gcloud auth login ...)
-            1. Check default configuration (gcloud config list)
-        2. If there are problems, delete previous public keys
-    2. Check whether you can access
-        1. Using the console
-        2. Through SFTP (Cyberduck)
-    3. Add shortcut to the terminal (to speed-up things)
-    4. Update certificates (in the code)
-    5. Install initial requirements (mysql, python, supervisor, ...)
+    1. Access from the local console
+        1. Log in gcloud (gcloud auth login ...)
+            1. Check default configuration (gcloud config list)
+        2. If there are problems, delete previous public keys
+    2. Check whether you can access
+        1. Using the console
+        2. Through SFTP (Cyberduck)
+    3. Add shortcut to the terminal (to speed-up things)
+    4. Update certificates (in the code)
+    5. Install initial requirements (mysql, python, supervisor, ...)
 4. Create CloudSQL instance (MySql 2nd gen) - (...Or use sqlite and f*ck it!)
-    1. Authorize IP "Home" (temp)
-    2. Create certificates (from the web)
-        1. Add them to the project
-        2. Add them to ~ / .ssh
-        3. Update codes (if necessary)
-    3. Check that you can access
-        1. Using the console
-        2. Through an IDE (DataGrip/MySQLWorkbench)
-    4. Add shortcut to the terminal
-    5. Import database *
+    1. Authorize IP "Home" (temp)
+    2. Create certificates (from the web)
+        1. Add them to the project
+        2. Add them to ~ / .ssh
+        3. Update codes (if necessary)
+    3. Check that you can access
+        1. Using the console
+        2. Through an IDE (DataGrip/MySQLWorkbench)
+    4. Add shortcut to the terminal
+    5. Import database *
 5. Verify domain (bare IPs present problems with (self-signed) certificates, browsers,...)
 6. Create static and media buckets (EU)
-    1. Add files
-    2. Check files
-    3. Delete cache folder
-    4. Make public bucket (Add member -> allUsers -> Storage Object Viewer)
-    5. Fix CORS problem
+    1. Add files
+    2. Check files
+    3. Delete cache folder
+    4. Make public bucket (Add member -> allUsers -> Storage Object Viewer)
+    5. Fix CORS problem
 7. Create credential API service account key (storage-auth.json)
-    1. Update code
+    1. Update code
 8. Run web in local - (Remote DB and buckets)
 10. Add/Update Google Analytics (if you want)
 11. Update Github
 12. Clone code to the server (`git clone ...`)
 13. Create virtual environment and install requirements
-    1. Ensuring the requirements have a specific version (*PLEASE WRITE THE FUCKING DEPENDENCY VERSIONS!!!!*)
+    1. Ensuring the requirements have a specific version (*PLEASE WRITE THE FUCKING DEPENDENCY VERSIONS!!!!*)
 14. Update settings.py
 15. Add shortcuts to .bashrc
 16. Configure Nginx
 17. Configure supervisor
 18. Configure Let'sEncrypt
-    1. Install certbot
-    2. Prepare Nginx
-        1. Disable routes from letsencrypt of the nginx config
-    3. Allowing HTTPS Through the Firewall (Activate UFW)
-    4. Obtain certificate
-    5. Updating Diffie-Hellman Parameters
-    6. Setting Up Auto Renewal (crontab, usually is automatic /etc/cron.d)
+    1. Install certbot
+    2. Prepare Nginx
+        1. Disable routes from letsencrypt of the nginx config
+    3. Allowing HTTPS Through the Firewall (Activate UFW)
+    4. Obtain certificate
+    5. Updating Diffie-Hellman Parameters
+    6. Setting Up Auto Renewal (crontab, usually is automatic /etc/cron.d)
 19. Authorize ComputeEngine instance to access the CloudSQL (external)
 20. Read logs
 21. Check browser console
