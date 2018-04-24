@@ -19,5 +19,7 @@ from core.views import views, views_ajax
 urlpatterns = [
     path('', views.index, name='index'),
     path('demo/', views.demo, name='demo'),
+    path('dolly/', views.dolly, name='dolly'),
     path('ajax/get-number/', views_ajax.get_number, name='get_number'),
+    path('ajax/check-job-status/', views_ajax.check_job_status, name='check_job_status'),
 ]

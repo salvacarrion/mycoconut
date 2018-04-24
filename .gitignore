@@ -12,3 +12,6 @@
 
 # Mac OS
 .DS_Store
+
+# Other ignores
+media/*

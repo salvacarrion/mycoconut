@@ -1,0 +1,38 @@
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+        padding-top: 54px;
+        margin-bottom: 65px;  /* Margin bottom by footer height */
+      }
+      @media (min-width: 992px) {
+        body {
+          padding-top: 56px;
+        }
+      }
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  line-height: 60px; /* Vertically center the text there */
+  background-color: #f5f5f5;
+}
+
+img.img-input{
+    max-width: 500px;
+    max-height: 200px;
+    height: 200px;
+}
+
+.img-input-sep{
+    font-size: 200px;
+}
+
+img.img-sim-faces{
+    height: 100px;
+}

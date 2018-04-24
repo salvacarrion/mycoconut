@@ -1,8 +1,47 @@
 import json
+
+from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+
+from celery.result import AsyncResult
+from mycoconut.celery import app as celery_app
 
 from core.utils import json_response
 from raefinder import *
+
+
+def job_response(async_result):
+    cel_get = async_result.get()
+    job_type = cel_get['job_type']
+
+    # Prepare response based on the processed job
+    if job_type == 'findclones':
+        top_candidates = []
+        for c in cel_get['res']:
+            dist, row = c
+            top_candidates.append({'id': row[0], 'name': row[1], 'face': row[5], 'original': row[6], 'distance': dist})
+        return render_to_string('core/includes/findclones.html', context={'top_candidates': top_candidates})
+    return None
+
+
+def check_job_status(request):
+    try:
+        job_id_session = request.session['job_id']
+        job_id_get = request.GET.get('job_id')
+
+        if job_id_get == job_id_session:   # Double check (SESSION and GET)
+            async_result = AsyncResult(job_id_get)
+            if async_result.ready():
+                return JsonResponse({'status': 'finished', 'result': job_response(async_result)})
+            else:
+                i = celery_app.control.inspect()
+                jobs_active = i.active()
+                return JsonResponse({'status': 'computing', 'jobs_ahead': len(next(iter(jobs_active.values())))})
+        else:
+            return JsonResponse({'error': 'Invalid Job ID'})
+    except Exception as e:
+        return JsonResponse({'error': str(e)})
 
 
 @csrf_exempt
@@ -45,3 +84,4 @@ def get_number(request):
 
     except Exception as e:
         return json_response(msg=str(e), error=True)
+

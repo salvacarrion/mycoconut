@@ -1,0 +1,188 @@
+{% extends "core/base.html" %}
+{% load static l10n %}
+
+{% block title %}Demo - Dolly{% endblock title %}
+{% block title_nav %}Dolly{% endblock title_nav %}
+
+{% block content %}
+
+
+    <!-- Page Content -->
+    <div class="container">
+
+        <!-- Title -->
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <h1 class="mt-5">Dolly</h1>
+                <p class="lead">Encuentra a tu clon</p>
+            </div>
+        </div>
+
+        <!-- Upload image -->
+        <div class="row">
+            <div class="col-lg-12">
+
+                <form class="needs-validation" action="" method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="inputGroupFile" name="myimage" required>
+                            <label class="custom-file-label" for="inputGroupFile">Choose file</label>
+                            <div class="invalid-feedback">Example invalid custom file feedback</div>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit">Upload</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- Progress bar -->
+        <div id="container-pb" style="display: none;">
+            <hr/>
+            <div class="row mt-2" id="progress-bar">
+                <div class="col-lg-12">
+                    <div id="loading-group">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+                        </div>
+                        <small>Computing... (<span id="jobs_ahead">{{ jobs_ahead|default:'?' }}</span> job/s ahead of you.)</small><br>
+                        <small><em>Job ID: {{ job_id|default:'-' }}</em></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="container-selface" style="display: none;">
+            <hr/>
+            <!-- Original/Selected face -->
+            <div class="row mt-2">
+                <div class="col-lg-12 text-center">
+
+                    {% if img_boxes %}
+                        <figure class="float-left">
+                            <figcaption>Original image:</figcaption>
+                            <a href="{{ img_boxes }}" data-toggle="lightbox">
+                                <img src="{{ img_boxes }}" class="rounded img-input">
+                            </a>
+                        </figure>
+
+                        <i class="fas fa-angle-right img-input-sep"></i>
+
+                        <figure class="float-right">
+                            <figcaption>Face selected:</figcaption>
+                            <a href="{{ img_face }}" data-toggle="lightbox">
+                                <img src="{{ img_face }}" class="rounded img-input">
+                            </a>
+                        </figure>
+
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div id="container-simfaces" style="display: none;">
+            <hr/>
+
+            <!-- List of similar faces -->
+            <div class="row mt-2">
+                <div class="col-lg-12 text-center" id="simfaces">
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block custom_js %}
+    <script>
+        $('#inputGroupFile').on('change',function(){
+            //get the file name
+            var fileName = $(this).val();
+            //replace the "Choose a file" label
+            $(this).next('.custom-file-label').html(fileName);
+        })
+    </script>
+
+    <script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.getElementsByClassName('needs-validation');
+                // Loop over them and prevent submission
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+
+    <script>
+        var job_id = false;
+        var waiting = false;
+
+        // Show progress bar when computing
+        {% if job_id %}
+            $('#container-pb').show();
+            $('#container-selface').show();
+            job_id = '{{ job_id }}';
+        {% else %}
+            $('#container-pb').hide();
+            $('#container-selface').hide();
+            $('#container-simfaces').hide();
+        {% endif %}
+
+        // Check job status
+        function check_job_status() {
+            console.log('calling...');
+            if (job_id && !waiting){  // Check if there is something to send
+                console.log('calling2...');
+                $.ajax({
+                    url: "{% url 'check_job_status' %}?job_id=" + job_id,
+                    type: "GET",
+                    beforeSend: function(xhr, settings) {
+                        waiting = true;
+                        $.ajaxSettings.beforeSend(xhr, settings);
+                    },
+                    cache: false,
+                    success: function (resp) {
+                        if (!resp["error"]) {
+                            if (resp["status"] === 'finished') {
+                                $('#simfaces').append(resp["result"]);
+                                window.clearInterval(timer_check);
+                                $('#container-pb').hide();
+                                $('#container-simfaces').show();
+                            }else{
+                                $('#jobs_ahead').text(resp["jobs_ahead"]);
+                            }
+                        } else {
+                            window.clearInterval(timer_check);
+                            $('#container-pb').hide();
+                            alert(resp['error']);
+                        }
+                        waiting = false;
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        window.clearInterval(timer_check);
+                        $('#container-pb').hide();
+                        waiting = false;
+                        alert('Failure!' + '\n\nMore: \n\t' + textStatus + '\n\t' + errorThrown);
+                    }
+                });
+            }
+        }
+
+        //This will call the ajax function every 3 seconds until the clearInterval function is called in the success callback.
+        var timer_check = window.setInterval(check_job_status, 3000);
+    </script>
+{% endblock custom_js %}

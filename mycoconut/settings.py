@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/2.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
-
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -24,12 +23,23 @@ SECRET_KEY = '^c4s&#)+kw_uyagsp#ms39moc+mx!oi-226b=gsdg+v%r3a-xy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+#USE_CACHE = True
+#PRODUCTION_DATABASE = True
+#PRODUCTION_FILE_SYSTEM = True
+#EMAIL_ERROR_REPORTING = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*']  # It's okay in Google Cloud
+
+
+# Just for production
+if not DEBUG:
+    # Activate only under a https connection
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -130,7 +140,13 @@ CORS_ORIGIN_ALLOW_ALL = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-#
-# MEDIA_URL = '/media/'
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# Celery serializer
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_ACCEPT_CONTENT = ['pickle']
