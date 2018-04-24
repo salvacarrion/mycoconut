@@ -1,5 +1,11 @@
 {% load static %}
 
 {% for c in top_candidates %}
-    <img src="{% get_media_prefix %}original/{{ c.original }}" class="rounded img-sim-faces" alt="Distance: {{ c.dist }} | id: {{ c.id }}">
+    {% if c.dist <= 0.5 %}
+    <img src="{% get_media_prefix %}original/{{ c.original }}" class="rounded img-sim-faces border border-success" alt="Distance: {{ c.dist }} | id: {{ c.id }}">
+    {% elif c.dist > 0.5 and c.dist <= 0.6 %}
+    <img src="{% get_media_prefix %}original/{{ c.original }}" class="rounded img-sim-faces border border-warning" alt="Distance: {{ c.dist }} | id: {{ c.id }}">
+    {% else %}
+    <img src="{% get_media_prefix %}original/{{ c.original }}" class="rounded img-sim-faces border border-danger" alt="Distance: {{ c.dist }} | id: {{ c.id }}">
+    {% endif %}
 {% endfor %}

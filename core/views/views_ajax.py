@@ -20,7 +20,7 @@ def job_response(async_result):
         top_candidates = []
         for c in cel_get['res']:
             dist, row = c
-            top_candidates.append({'id': row[0], 'name': row[1], 'face': row[5], 'original': row[6], 'distance': dist})
+            top_candidates.append({'id': row[0], 'name': row[1], 'face': row[5], 'original': row[6], 'dist': dist})
         return render_to_string('core/includes/findclones.html', context={'top_candidates': top_candidates})
     return None
 
