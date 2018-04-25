@@ -1,10 +1,7 @@
-import os, time
-import uuid
-from celery.result import AsyncResult
-from django.shortcuts import render, render_to_response
-from django.views.decorators.csrf import csrf_exempt
-from django.core.files.storage import FileSystemStorage
 from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+from django.shortcuts import render, render_to_response, redirect, reverse
+from django.core.cache import cache
 
 from mycoconut.celery import app as celery_app
 
@@ -20,7 +17,7 @@ def demo(request):
     return render(request, 'core/demo.html')
 
 
-def dolly(request):
+def dolly(request, job_id=None):
     if request.method == 'POST' and request.FILES['myimage']:
 
         # Save image
@@ -57,6 +54,19 @@ def dolly(request):
                    'job_id': job_id,
                    'jobs_ahead': len(next(iter(jobs_active.values())))}
 
-        return render_to_response('core/dolly.html', context)
+        # Save result in cache
+        cache.set('res-' + job_id, context)
+
+        return redirect(reverse('dolly_get_job', args=[job_id]))
     else:
         return render(request, 'core/dolly.html')
+
+
+def dolly_get_job(request, job_id=None):
+    # Get page params from cache
+    context = cache.get('res-' + job_id)
+
+    if job_id and context:
+        return render(request, 'core/dolly.html', context)
+    else:  # No job or invalid
+        return redirect('dolly')

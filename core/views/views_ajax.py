@@ -3,6 +3,7 @@ import json
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.core.cache import cache
 
 from celery.result import AsyncResult
 from mycoconut.celery import app as celery_app
@@ -21,27 +22,27 @@ def job_response(async_result):
         for c in cel_get['res']:
             dist, row = c
             top_candidates.append({'id': row[0], 'name': row[1], 'face': row[5], 'original': row[6], 'dist': dist})
+
+        # Get, update and set results in cache
+        context = cache.get('res-' + async_result.id)
+        context['top_candidates'] = top_candidates
+        cache.set('res-' + async_result.id, context)
+
         return render_to_string('core/includes/findclones.html', context={'top_candidates': top_candidates})
     return None
 
 
 def check_job_status(request):
     try:
-        job_id_session = request.session['job_id']
-        job_id_get = request.GET.get('job_id')
-
-        if job_id_get == job_id_session:   # Double check (SESSION and GET)
-            async_result = AsyncResult(job_id_get)
-            if async_result.ready():
-                return JsonResponse({'status': 'finished', 'result': job_response(async_result)})
-            else:
-                i = celery_app.control.inspect()
-                jobs_active = i.active()
-                return JsonResponse({'status': 'computing', 'jobs_ahead': len(next(iter(jobs_active.values())))})
+        async_result = AsyncResult(request.GET.get('job_id'))
+        if async_result.ready():
+            return JsonResponse({'status': 'finished', 'result': job_response(async_result)})
         else:
-            return JsonResponse({'error': 'Invalid Job ID'})
-    except Exception as e:
-        return JsonResponse({'error': str(e)})
+            i = celery_app.control.inspect()
+            jobs_active = i.active()
+            return JsonResponse({'status': 'computing', 'jobs_ahead': len(next(iter(jobs_active.values())))})
+    except KeyError as e:
+        return JsonResponse({'error': 'Invalid Job ID'})
 
 
 @csrf_exempt

@@ -2,8 +2,6 @@
 
 This project is used to test small projects and experiements that I post online
 
-## THIS IS SETUP NO UP-TO-DATE SO TAKE IT WITH A GRAIN OF SALT
-
 
 Requirements
 ---
@@ -131,6 +129,8 @@ Check this out:
 Install Celery
 ---
 
+_Note: Remember to restart celery when the code of the tasks changes_
+
 **1. Install RabbitMQ outside the virtual environment**
 
 - Ubuntu:
@@ -147,7 +147,7 @@ Install Celery
 
 **3. Start Celery using this project**
 
-    celery -A (PROJECTS_NAME) worker --loglevel=info
+    celery -A (PROJECT_NAME) worker --loglevel=info
 
 
 **4. Demonizing Celery**

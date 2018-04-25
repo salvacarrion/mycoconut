@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/2.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
-import os
+import os, json
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,10 +23,10 @@ SECRET_KEY = '^c4s&#)+kw_uyagsp#ms39moc+mx!oi-226b=gsdg+v%r3a-xy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-#USE_CACHE = True
-#PRODUCTION_DATABASE = True
-#PRODUCTION_FILE_SYSTEM = True
-#EMAIL_ERROR_REPORTING = False
+USE_CACHE = True
+PRODUCTION_DATABASE = False
+DISTRIBUTED_FILE_SYSTEM = False
+EMAIL_ERROR_REPORTING = False
 
 ALLOWED_HOSTS = ['*']  # It's okay in Google Cloud
 
@@ -38,9 +38,22 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
+#     PREPEND_WWW = True  # Force www.*
+#
+#     # Debugging tools
+#     DEBUG_TOOLBAR_CONFIG = {
+#         'SHOW_TOOLBAR_CALLBACK': lambda request: False,
+#     }
+# else:
+#     # Debugging tools
+#     DEBUG_TOOLBAR_CONFIG = {
+#         'SHOW_TOOLBAR_CALLBACK': lambda request: True,
+#     }
+
 
 # Application definition
 INSTALLED_APPS = [
+    # Django core apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,14 +64,18 @@ INSTALLED_APPS = [
     # Django plugins
     'corsheaders',
 
-    # Django apps
+    # My apps
     'mycoconut',
     'core',
 ]
 
 MIDDLEWARE = [
+    # Cache 1/2
+    #'django.middleware.cache.UpdateCacheMiddleware',
+
     # Additional
     'corsheaders.middleware.CorsMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware', # Needs to be as higher as possible
 
     # Django
     'django.middleware.security.SecurityMiddleware',
@@ -68,6 +85,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # Cache 2/2
+    #'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
 ROOT_URLCONF = 'mycoconut.urls'
@@ -93,12 +113,174 @@ WSGI_APPLICATION = 'mycoconut.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if PRODUCTION_DATABASE:
+    # Running on production GCP, so connect to Google Cloud SQL using
+    # the unix socket at /cloudsql/<your-cloudsql-connection string>
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': '',
+            'NAME': '',
+            'USER': 'root',
+            'PASSWORD': '',
+            'CONN_MAX_AGE': 10 * 60,  # Persistent for 10min
+            'OPTIONS': {
+                'ssl': {'ca': os.path.abspath('./auth/certificates/mysql-client-certificates/server-ca.pem'),
+                        'cert': os.path.abspath('./auth/certificates/mysql-client-certificates/client-cert.pem'),
+                        'key': os.path.abspath('./auth/certificates/mysql-client-certificates/client-key.pem'),
+                        }
+            }
+        }
     }
+
+else:
+    # Running locally so connect to either a local MySQL instance or connect to
+    # Cloud SQL via the proxy. To start the proxy via command line:
+    #
+    #     $ cloud_sql_proxy -instances=[INSTANCE_CONNECTION_NAME]=tcp:3306
+    #
+    # See https://cloud.google.com/sql/docs/mysql-connect-proxy
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            # 'HOST': '127.0.0.1',
+            # 'PORT': '3306',
+            # 'USER': 'root',
+            # 'PASSWORD': '',
+            # 'CONN_MAX_AGE': 10 * 60,  # Persistent for 10min
+        }
+    }
+
+
+# Cache
+# https://docs.djangoproject.com/en/2.0/topics/cache/
+# [django-redis] https://niwinz.github.io/django-redis/latest/
+if USE_CACHE:
+    # Cache time to live (X = minutes).
+    CACHE_TTL = None  # X * 60 (None = Never expires; 0 = Expires immediately)
+
+    # Cache database
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+             #'LOCATION': 'redis://127.0.0.1:6379/1',
+            'LOCATION': '/var/run/redis/redis.sock',
+            'TIMEOUT': CACHE_TTL,  # seconds
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+            }
+        },
+        'KEY_PREFIX': 'coconut',
+    }
+
+    # Storing sessions in the cache
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+
+else:  # Dummy cache just for development
+
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        }
+    }
+
+
+# File system
+# https://docs.djangoproject.com/en/2.0/ref/settings/
+if DISTRIBUTED_FILE_SYSTEM:
+    # Load auth file (.json )
+    storage_auth_path = os.path.abspath('./auth/storage-auth.json')
+    storage_auth = json.load(open(storage_auth_path, 'r'))
+
+    # Cloud Provider Storage
+    LIBCLOUD_PROVIDERS = {
+        'google': {
+            'type': 'libcloud.storage.types.Provider.GOOGLE_STORAGE',
+            'user': storage_auth['client_email'],
+            'key': storage_auth['private_key'],
+            'bucket': '',
+        },
+    }
+    DEFAULT_LIBCLOUD_PROVIDER = 'google'
+    # DEFAULT_FILE_STORAGE = 'storages.backends.apache_libcloud.LibCloudStorage'
+    DEFAULT_FILE_STORAGE = 'core.helpers.FastLibCloudStorage'  # My fast custom implementation
+
+    # Static and media files (CSS, JavaScript, Images)
+    STATIC_URL = 'https://storage.googleapis.com/{}/'.format('')
+    MEDIA_URL = 'https://storage.googleapis.com/{}/'.format('')
+else:
+    # Static files (CSS, JavaScript, Images)
+    # https://docs.djangoproject.com/en/2.0/howto/static-files/
+
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# Logging
+# https://docs.djangoproject.com/en/2.0/topics/logging/
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[%(levelname)s]: (%(asctime)s %(module)s %(process)d %(thread)d): %(message)s'
+        },
+        'simple': {
+            'format': '[%(levelname)s]: %(message)s'
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'level': 'WARNING',
+            'filters': ['require_debug_false'],
+            'class': 'logging.FileHandler',
+            'filename': os.path.abspath('./logs/django.log'),  # Production
+            'formatter': 'verbose'
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'django.security': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
 }
 
 
@@ -136,17 +318,25 @@ USE_TZ = True
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.0/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# Error reporting
+# https://docs.djangoproject.com/en/2.0/howto/error-reporting/
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+if EMAIL_ERROR_REPORTING:
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_HOST_USER = ''
+    EMAIL_HOST_PASSWORD = ''
+    EMAIL_USE_TLS = True
+    SERVER_EMAIL = EMAIL_HOST_USER
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+    ADMINS = [('Dev', 'salcarpo@inf.upv.es')]
 
 
 # Celery serializer
+# http://docs.celeryproject.org/en/latest/userguide/calling.html#serializers
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_ACCEPT_CONTENT = ['pickle']
+

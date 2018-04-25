@@ -1,7 +1,7 @@
 # Core dependencies
 Django==2.0.4
 celery==4.1.0
-redis==2.10.6
+django-redis==4.9.0
 
 # Configuration
 gunicorn==19.7.1
@@ -13,5 +13,10 @@ django-storages==1.6.6
 apache-libcloud==2.3.0
 pycrypto==2.6.1
 
+# Dev
+django-debug-toolbar==1.9.1
+line-profiler==2.0
+
 # My repos
 git+https://github.com/salvacarrion/raefinder.git#egg=raefinder
+git+https://github.com/salvacarrion/dolly.git#egg=dolly

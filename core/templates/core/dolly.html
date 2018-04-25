@@ -22,7 +22,7 @@
         <div class="row">
             <div class="col-lg-12">
 
-                <form class="needs-validation" action="" method="post" enctype="multipart/form-data" novalidate>
+                <form class="needs-validation" action="{% url 'dolly' %}" method="post" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
                     <div class="input-group">
                         <div class="custom-file">
@@ -58,28 +58,30 @@
         <div id="container-selface" style="display: none;">
             <hr/>
             <!-- Original/Selected face -->
-            <div class="row mt-2">
-                <div class="col-lg-12 text-center">
-
-                    {% if img_boxes %}
-                        <figure class="float-left">
+            <div class="row mt-2 text-center input-grid">
+                {% if img_boxes %}
+                    <div class="col-sm-4">
+                        <figure class="">
                             <figcaption>Original image:</figcaption>
-                            <a href="{{ img_boxes }}" data-toggle="lightbox">
-                                <img src="{{ img_boxes }}" class="rounded img-input">
+                            <a class="" href="{{ img_boxes }}" data-toggle="lightbox">
+                                <img src="{{ img_boxes }}" class="rounded">
                             </a>
                         </figure>
+                    </div>
 
+                    <div class="col-sm-4">
                         <i class="fas fa-angle-right img-input-sep"></i>
+                    </div>
 
-                        <figure class="float-right">
+                    <div class="col-sm-4">
+                        <figure class="">
                             <figcaption>Face selected:</figcaption>
                             <a href="{{ img_face }}" data-toggle="lightbox">
-                                <img src="{{ img_face }}" class="rounded img-input">
+                                <img src="{{ img_face }}" class="rounded">
                             </a>
                         </figure>
-
-                    {% endif %}
-                </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
@@ -93,7 +95,7 @@
                 </div>
             </div>
         </div>
-    </div>
+ </div>
 
 {% endblock content %}
 
@@ -184,6 +186,7 @@
         }
 
         //This will call the ajax function every 3 seconds until the clearInterval function is called in the success callback.
+        check_job_status();
         var timer_check = window.setInterval(check_job_status, 3000);
     </script>
 {% endblock custom_js %}

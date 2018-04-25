@@ -1,32 +1,35 @@
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-        padding-top: 54px;
-        margin-bottom: 65px;  /* Margin bottom by footer height */
-      }
-      @media (min-width: 992px) {
-        body {
-          padding-top: 56px;
-        }
-      }
-
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  /* Set the fixed height of the footer here */
-  height: 60px;
-  line-height: 60px; /* Vertically center the text there */
-  background-color: #f5f5f5;
+    padding-top: 54px;
+    margin-bottom: 85px;  /* Margin bottom by footer height */
+}
+@media (min-width: 992px) {
+    body {
+        padding-top: 56px;
+    }
 }
 
-img.img-input{
-    max-width: 500px;
-    max-height: 200px;
-    height: 200px;
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 60px;
+    line-height: 60px; /* Vertically center the text there */
+    background-color: #f5f5f5;
+}
+
+.input-grid{
+    overflow: hidden;
+}
+
+.input-grid img{
+    max-height: 150px;
+    min-height: 150px;
 }
 
 .img-input-sep{
@@ -35,4 +38,24 @@ img.img-input{
 
 img.img-sim-faces{
     height: 100px;
+    border-width: 3px !important;
 }
+
+img.conf:hover{
+    -webkit-filter: none !important; /* Safari 6.0 - 9.0 */
+    filter: none !important;
+}
+img.conf.c-2{
+    -webkit-filter: blur(1px) grayscale(50%); /* Safari 6.0 - 9.0 */
+    filter: blur(1px) grayscale(50%);
+}
+
+img.conf.c-3{
+    -webkit-filter: blur(3px) grayscale(100%); /* Safari 6.0 - 9.0 */
+    filter: blur(3px) grayscale(100%);
+}
+
+/*.tint:hover { background: none; }*/
+
+/*.tint.t-orange { background: rgba(255, 193, 7, 0.4); }*/
+/*.tint.t-red { background: rgba(220, 53, 69, 0.7); }*/
