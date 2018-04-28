@@ -4,12 +4,14 @@ from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.core.cache import cache
+from django.conf import settings
 
 from celery.result import AsyncResult
 from mycoconut.celery import app as celery_app
 
 from core.utils import json_response
 from raefinder import *
+from dolly import *
 
 
 def job_response(async_result):
@@ -18,17 +20,51 @@ def job_response(async_result):
 
     # Prepare response based on the processed job
     if job_type == 'findclones':
-        top_candidates = []
-        for c in cel_get['res']:
-            dist, row = c
-            top_candidates.append({'id': row[0], 'name': row[1], 'face': row[5], 'original': row[6], 'dist': dist})
-
-        # Get, update and set results in cache
         context = cache.get('res-' + async_result.id)
-        context['top_candidates'] = top_candidates
-        cache.set('res-' + async_result.id, context)
 
-        return render_to_string('core/includes/findclones.html', context={'top_candidates': top_candidates})
+        # Get candidates info
+        if not context.get('top_candidates'):
+            top_candidates = []
+            for c in cel_get['res']:
+                dist, row = c
+                freebase_mid = row[4]
+                image_url = '{}/{}/{}-FaceId-0.jpg'.format('msceleb', freebase_mid, row[6])
+                top_candidates.append({'id': row[0], 'entity_name': freebase_mid, 'image_url': image_url, 'dist': dist})
+
+            # Render html
+            clones_html = render_to_string('core/includes/findclones.html', context={'top_candidates': top_candidates})
+
+            # Save params
+            context['top_candidates'] = top_candidates
+            context['clones_html'] = clones_html
+
+        # Get info from Google Knowledge Graph
+        try:
+            if not context.get('gkg_info'):
+                matched = context['top_candidates'][0]
+                gkg_res = get_more_info(freebase_mid=matched['entity_name'], api_key=getattr(settings, 'GKG_API', None))
+                if gkg_res:
+                    gkg_info = {'name': gkg_res['itemListElement'][0]['result']['name'],
+                                'description': gkg_res['itemListElement'][0]['result']['description'],
+                                'description_url': gkg_res['itemListElement'][0]['result']['detailedDescription']['url'],
+                                'articleBody': gkg_res['itemListElement'][0]['result']['detailedDescription']['articleBody'],
+                                'url': gkg_res['itemListElement'][0]['result']['url']
+                                }
+
+                    # Render html
+                    matched_html = render_to_string('core/includes/matched.html', context={'matched': matched,
+                                                                                           'gkg_info': gkg_info})
+
+                    # Save params
+                    context['gkg_info'] = gkg_info
+                    context['matched_html'] = matched_html
+        except KeyError as e:
+            print('GKG Key error - Pending to solve')
+
+        # Save in cached
+        cache.set('res-' + async_result.id, context)
+        return {'clones_html': context.get('clones_html', ''), 'matched_html': context.get('matched_html', '')}
+
     return None
 
 

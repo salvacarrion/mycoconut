@@ -90,9 +90,10 @@
 
             <!-- List of similar faces -->
             <div class="row mt-2">
-                <div class="col-lg-12 text-center" id="simfaces">
-                    <p class="lead">Top 10 most similar faces</p>
-                </div>
+                    <div class="col-sm-12 col-lg-6 text-left mb-2" id="matched-face">
+                    </div>
+                    <div class="col-sm-12 col-lg-6 text-center" id="top-faces">
+                    </div>
             </div>
         </div>
  </div>
@@ -161,7 +162,8 @@
                     success: function (resp) {
                         if (!resp["error"]) {
                             if (resp["status"] === 'finished') {
-                                $('#simfaces').append(resp["result"]);
+                                $('#matched-face').append(resp["result"]['matched_html']);
+                                $('#top-faces').append(resp["result"]['clones_html']);
                                 window.clearInterval(timer_check);
                                 $('#container-pb').hide();
                                 $('#container-simfaces').show();

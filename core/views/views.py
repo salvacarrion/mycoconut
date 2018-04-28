@@ -30,22 +30,20 @@ def dolly(request, job_id=None):
         filename_m = MEDIA_ROOT + '/' + filename
 
         # Draw rectangle faces
-        path_boxes = str(uuid.uuid1()) + '.jpg'
+        path_boxes = 'uploads/' + str(uuid.uuid1()) + '.jpg'
         face_0, face_locations = draw_boxes(filename_m, MEDIA_ROOT + '/' + path_boxes, console=False)
 
         # Crop face[0]
-        path_face = str(uuid.uuid1()) + '.jpg'
+        path_face = 'uploads/' + str(uuid.uuid1()) + '.jpg'
         pil_face_0 = crop_image(face_0, face_locations[0], console=False)
         draw_landmarks(np.array(pil_face_0), MEDIA_ROOT + '/' + path_face, console=False)
 
         # Find clones
         i = celery_app.control.inspect()
         job_id = str(tasks.async_findclones.delay(filename_m, top_k=10))
-        # a = i.scheduled()
         jobs_active = i.active()
-        # c = i.reserved()
-        # d = i.registered()
-        #
+        # t = findclones(filename_m, top_k=10)  # Testing
+
 
         # Add params
         request.session['job_id'] = job_id
