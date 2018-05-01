@@ -2,10 +2,19 @@
 
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title">{{ gkg_info.name }}</h5>
-        <small>{{ gkg_info.description }}</small>
-        <p class="card-text">{{ gkg_info.articleBody }} <small><a href="{{ gkg_info.description_url }}" target="_blank">Wikipedia</a></small></p>
-        <p class="card-text"><small class="text-muted">More: <a href="{{ gkg_info.url }}" target="_blank">{{ gkg_info.url }}</a></small></p>
+        <h5 class="card-title">{{ gkg_entity.name|default:'?' }}</h5>
+
+        {% if gkg_entity.description %}
+            <small>{{ gkg_entity.description|default:'?' }}</small>
+        {% endif %}
+
+        {% if gkg_entity.detailedDescription.articleBody %}
+            <p class="card-text">{{ gkg_entity.detailedDescription.articleBody|default:'?' }} <small><a href="{{ gkg_entity.detailedDescription.url }}" target="_blank">Wikipedia</a></small></p>
+        {% endif %}
+
+        {% if gkg_entity.url %}
+            <p class="card-text"><small class="text-muted">More: <a href="{{ gkg_entity.url }}" target="_blank">{{ gkg_entity.url }}</a></small></p>
+        {% endif %}
     </div>
     <hr class="mb-0">
     <div class="text-center">

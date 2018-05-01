@@ -38,6 +38,16 @@
             </div>
         </div>
 
+        <!-- Error container -->
+        {% if error == 'no_faces' %}
+        <div id="container-error">
+            <div class="row mt-2">
+                <div class="col-lg-12">
+                    <div class="p-3 mb-2 bg-danger text-white">ERROR! No images were found in the input image. Please, try with an easier one.</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Progress bar -->
         <div id="container-pb" style="display: none;">

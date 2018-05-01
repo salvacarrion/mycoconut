@@ -38,7 +38,8 @@ body {
 
 img.img-sim-faces{
     height: 100px;
-    border-width: 3px !important;
+    border-width: 2px !important;
+    margin: 2px 0px;
 }
 
 img.conf:hover{
