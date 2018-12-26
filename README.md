@@ -1,6 +1,6 @@
 # Coconut's Django server
 
-This project is used to test small projects and experiements that I post online
+This project is used to test small projects and experiments that I post online
 
 
 Requirements
@@ -18,14 +18,14 @@ Installation
 ---
 
 1. Run `ubuntu_setup.sh`
-2. Add `config/.bashrc` shortchuts to `.bashrc`
-3. Setup nginx
+2. Add `config/.bashrc` shortcuts to `.bashrc`
+3. Setup Nginx
 4. Setup supervisor
 
 
 Basic deployment (draft)
 ---
-1. Create gmail account
+1. Create Gmail account
 2. Create Google Cloud account (1-year free)
 3. Create Compute Engine instance (small)
     1. Access from the local console
@@ -37,8 +37,8 @@ Basic deployment (draft)
         2. Through SFTP (Cyberduck)
     3. Add shortcut to the terminal (to speed-up things)
     4. Update certificates (in the code)
-    5. Install initial requirements (mysql, python, supervisor, ...)
-4. Create CloudSQL instance (MySql 2nd gen) - (...Or use sqlite and f*ck it!)
+    5. Install initial requirements (MySQL, python, supervisor, ...)
+4. Create CloudSQL instance (MySql 2nd gen) - (...Or use SQLite and f*ck it!)
     1. Authorize IP "Home" (temp)
     2. Create certificates (from the web)
         1. Add them to the project
@@ -62,7 +62,7 @@ Basic deployment (draft)
 10. Add/Update Google Analytics (if you want)
 11. Update Github
 12. Clone code to the server (`git clone ...`)
-13. Create virtual environment and install requirements
+13. Create a virtual environment and install requirements
     1. Ensuring the requirements have a specific version (*PLEASE WRITE THE FUCKING DEPENDENCY VERSIONS!!!!*)
 14. Update settings.py
 15. Add shortcuts to .bashrc
@@ -252,7 +252,7 @@ Let's encrypt
 > **See more: ** [https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-16-04](https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-16-04)
 
 
-Set up firewall on Ubuntu (optional)
+Set up a firewall on Ubuntu (optional)
 ---
 
 > **See more:** [https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-with-ufw-on-ubuntu-14-04](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-with-ufw-on-ubuntu-14-04)
